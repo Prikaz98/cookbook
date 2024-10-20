@@ -1,17 +1,78 @@
 #+title: Cookie Book Ru
+#+auto_tangle: t
 
 Таблица соотношения объема к весу:
 Стакан - 250мл
+* Таблица соответствий
 
-| Продукт        | грамм/стакан | грамм/ст. ложку |
-|----------------+--------------+-----------------|
-| Мука пшеничная |          160 |              45 |
-| Соль           |          325 |              30 |
+#+name: p2p
+| Продукт            | грамм/стакан | грамм/ст. ложку |
+|--------------------+--------------+-----------------|
+| Вода               |          250 |              15 |
+| Гречка             |          210 |              27 |
+| Дрожжи             |          100 |              10 |
+| Кефир              |          160 |              18 |
+| Масло растительное |          140 |              20 |
+| Мед                |          320 |              35 |
+| Молоко             |          250 |              15 |
+| Мука пшеничная     |          160 |              45 |
+| Рис                |          240 |              27 |
+| Сливочное масло    |          320 |              22 |
+| Соль               |          325 |              30 |
+
+* Computation code
+:PROPERTIES:
+:header-args: :tangle cook-fun-ru.el :results silent
+:END:
+
+*Turn on closures*
+#+begin_src emacs-lisp
+;; -*- lexical-binding: t; -*-
+#+end_src
+
+#+name: how-many-cups
+#+begin_src emacs-lisp :var p2p=p2p
+(require 'dash)
+
+(defun how-many-cups-ru (&optional product grams)
+  "Look for in table product and return count of cups."
+  (interactive)
+  (setq product (or product
+                    (let* ((choices (-map 'car p2p))
+                           (selection (completing-read "Выберете продукт: " choices)))
+                      selection)))
+  (setq grams (or grams (read-number "Сколько грамм? ")))
+  (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
+    (if product-proportion
+        (message (format "Для %d гр. нужно %.2f стакана" grams (/ (* grams 1.0) (nth 1 product-proportion))))
+      (concat "Не получилось найти продукт по имени: " product))))
+
+(defun how-many-spoons-ru (&optional product grams)
+  "Look for in table product and return count of spoons."
+  (interactive)
+  (setq product (or product
+                    (let* ((choices (-map 'car p2p))
+                           (selection (completing-read "Выберете продукт: " choices)))
+                      selection)))
+  (setq grams (or grams (read-number "Сколько грамм? ")))
+  (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
+    (if product-proportion
+        (message (format "Для %d гр. нужно %.2f столовых ложек" grams (/ (* grams 1.0) (nth 2 product-proportion))))
+      (concat "Не получилось найти продукт по имени: " product))))
+#+end_src
+
+* Обновить таблицу соответсвий
+#+begin_src emacs-lisp :results silent
+(with-temp-buffer
+  (insert-file-contents "./cook-fun-ru.el")
+  (eval-buffer)
+  (message "Таблица соответсвий обновлена!"))
+#+end_src
 
 * Пельмени
 
 _Тесто:_
-1. Мука пшеничная просеянная - 500 г + для работы с тестом
+1. Мука пшеничная - 500 г + для работы с тестом или 3 стакана
 2. Вода горячая (70-75 градусов) - 250 мл
 3. Яйцо (небольшое) - 1 шт.
 4. Соль - 1 ч. ложка без горки
@@ -33,16 +94,19 @@ _Для варки:_
 
 _Для подачи:_
 Масло сливочное - по вкусу
+
+- Note taken on [2024-10-20 Sun 20:19] \\
+  Получилось многовато теста, так что возможно стоит брать муки грамм 400-420.
 * Пироги
 
 _Тесто:_
 1. теплая вода – 100 мл;
 2. теплое молоко – 100 мл;
-3. мука – 450 г;
+3. мука – 450 г или почти 3 стакана (не досыпая последний);
 4. яйца – 2 шт.;
-5. сухие быстродействующие дрожжи – 7 г;
+5. сухие быстродействующие дрожжи – 7 г, 3/4 столовой ложки;
 6. сахар – 2 ст. л. в тесто + 0,5 стакана для начинки;
-7. масло сливочное – 70 г. в тесто + 30 г для начинки;
+7. масло сливочное – 70 г. (3 ст. ложки с горкой) в тесто + 30 г (1.5 ложки) для начинки;
 8. соль – 2 щепотки.
 
 _Что делать?_
@@ -53,8 +117,8 @@ _Что делать?_
 * Манты
 
 _Тесто:_
-1. 1 кг муки
-2. 350-400 мл.л воды (в воду можно добавить немного масла)
+1. 1 кг муки или 6.25 стакана
+2. 350-400 мл.л воды (в воду можно добавить немного масла) или 1.6 стакана
 3. 1 куриное яйцо
 
 //TODO граммовки
