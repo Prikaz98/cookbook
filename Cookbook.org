@@ -1,4 +1,4 @@
-#+title: Cookie Book Ru
+#+title: Cookbook Ru
 #+auto_tangle: t
 
 Таблица соотношения объема к весу:
