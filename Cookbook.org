@@ -34,6 +34,9 @@
 #+begin_src emacs-lisp :var p2p=p2p
 (require 'dash)
 
+(defvar insert-instantly t
+  "Write result instanly in the end of the line.")
+
 (defun how-many-cups-ru (&optional product grams)
   "Look for in table product and return count of cups."
   (interactive)
@@ -41,10 +44,16 @@
                     (let* ((choices (-map 'car p2p))
                            (selection (completing-read "Выберете продукт: " choices)))
                       selection)))
-  (setq grams (or grams (read-number "Сколько грамм? ")))
+  (setq grams (or grams
+                  (ignore-errors (string-to-number (current-word)))
+                  (read-number "Сколько грамм? ")))
   (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
     (if product-proportion
-        (message (format "Для %d гр. нужно %.2f стакана" grams (/ (* grams 1.0) (nth 1 product-proportion))))
+        (let ((res (/ (* grams 1.0) (nth 1 product-proportion))))
+          (message (format "Для %d гр. нужно %.2f стакана" grams res))
+          (save-excursion
+            (end-of-line)
+            (insert (format " (%.2f стакана)" res))))
       (concat "Не получилось найти продукт по имени: " product))))
 
 (defun how-many-spoons-ru (&optional product grams)
@@ -54,10 +63,16 @@
                     (let* ((choices (-map 'car p2p))
                            (selection (completing-read "Выберете продукт: " choices)))
                       selection)))
-  (setq grams (or grams (read-number "Сколько грамм? ")))
+  (setq grams (or grams
+                  (ignore-errors (string-to-number (current-word)))
+                  (read-number "Сколько грамм? ")))
   (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
     (if product-proportion
-        (message (format "Для %d гр. нужно %.2f столовых ложек" grams (/ (* grams 1.0) (nth 2 product-proportion))))
+        (let ((res (/ (* grams 1.0) (nth 2 product-proportion))))
+          (message (format "Для %d гр. нужно %.2f столовых ложек" grams res))
+          (save-excursion
+            (end-of-line)
+            (insert (format " (%.2f ложки)" res))))
       (concat "Не получилось найти продукт по имени: " product))))
 #+end_src
 
@@ -131,3 +146,20 @@ _Для начинки:_
 
 _Что делать?_
 После замеса можно убрать тесто в морозилник, что бы оно еще немного дало влаги с лучше смешалось. Пока можно заняться начинкой, лук, картофель, мясо, посолить, поперчить и можно добавить паприку для цвета и вкуса. Перемешать.
+* Пицца
+Опару настаивать 1 час при комнатной температуре или 24 часа в холодильнике.
+
+_Рецепт опары:_
+- 300 мл Вода (1.2 стакана)
+- 300 гр. Мука (1.9 стакана)
+- 5 гр Сухие дрожжи (пол столовой ложки)
+- 5 гр Мед (меньше половину столовой ложки)
+
+_Тесто:_
+ - Опара (вся)
+ - 700 мл Воды (2.80 стакана)
+ - 40 гр. Морская соль (1.33 ложки)
+ - 1250 гр. Мука (7.81 стакана)
+
+После замешивания тесто станет липким, его нужно просто оставить на 15 минут.
+Следующим шагом формируем из теста большой шар и оставляем его на 30 минут. После можно разделить на небольшие шарики и оставить еще на 2 часа, после чего нужно выпекать.
