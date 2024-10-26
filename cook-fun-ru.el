@@ -6,8 +6,8 @@
 (defvar insert-instantly t
   "Write result instanly in the end of the line.")
 
-(defun how-many-cups-ru (&optional product grams)
-  "Look for in table product and return count of cups."
+(defun how-many-ru (&optional product grams)
+  "Look for in table product and return count of cups or spoons."
   (interactive)
   (setq product (or product
                     (let* ((choices (-map 'car p2p))
@@ -18,29 +18,12 @@
                   (read-number "Сколько грамм? ")))
   (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
     (if product-proportion
-        (let ((res (/ (* grams 1.0) (nth 1 product-proportion))))
-          (message (format "Для %d гр. нужно %.2f стакана" grams res))
+        (let* ((cups? (> grams 100))
+               (res (/ (* grams 1.0) (nth (if cups? 1 2) product-proportion)))
+               (measure-thing (if cups? "стакана" "ложек")))
+          (message (format "Для %d гр. нужно %.2f %s" grams res measure-thing ))
           (save-excursion
             (end-of-line)
-            (insert (format " (%.2f стакана)" res))))
-      (concat "Не получилось найти продукт по имени: " product))))
-
-(defun how-many-spoons-ru (&optional product grams)
-  "Look for in table product and return count of spoons."
-  (interactive)
-  (setq product (or product
-                    (let* ((choices (-map 'car p2p))
-                           (selection (completing-read "Выберете продукт: " choices)))
-                      selection)))
-  (setq grams (or grams
-                  (ignore-errors (string-to-number (current-word)))
-                  (read-number "Сколько грамм? ")))
-  (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
-    (if product-proportion
-        (let ((res (/ (* grams 1.0) (nth 2 product-proportion))))
-          (message (format "Для %d гр. нужно %.2f столовых ложек" grams res))
-          (save-excursion
-            (end-of-line)
-            (insert (format " (%.2f ложки)" res))))
+            (insert (format " (%.2f %s)" res measure-thing))))
       (concat "Не получилось найти продукт по имени: " product))))
 )

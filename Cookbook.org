@@ -37,8 +37,8 @@
 (defvar insert-instantly t
   "Write result instanly in the end of the line.")
 
-(defun how-many-cups-ru (&optional product grams)
-  "Look for in table product and return count of cups."
+(defun how-many-ru (&optional product grams)
+  "Look for in table product and return count of cups or spoons."
   (interactive)
   (setq product (or product
                     (let* ((choices (-map 'car p2p))
@@ -49,30 +49,13 @@
                   (read-number "Сколько грамм? ")))
   (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
     (if product-proportion
-        (let ((res (/ (* grams 1.0) (nth 1 product-proportion))))
-          (message (format "Для %d гр. нужно %.2f стакана" grams res))
+        (let* ((cups? (> grams 100))
+               (res (/ (* grams 1.0) (nth (if cups? 1 2) product-proportion)))
+               (measure-thing (if cups? "стакана" "ложек")))
+          (message (format "Для %d гр. нужно %.2f %s" grams res measure-thing ))
           (save-excursion
             (end-of-line)
-            (insert (format " (%.2f стакана)" res))))
-      (concat "Не получилось найти продукт по имени: " product))))
-
-(defun how-many-spoons-ru (&optional product grams)
-  "Look for in table product and return count of spoons."
-  (interactive)
-  (setq product (or product
-                    (let* ((choices (-map 'car p2p))
-                           (selection (completing-read "Выберете продукт: " choices)))
-                      selection)))
-  (setq grams (or grams
-                  (ignore-errors (string-to-number (current-word)))
-                  (read-number "Сколько грамм? ")))
-  (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
-    (if product-proportion
-        (let ((res (/ (* grams 1.0) (nth 2 product-proportion))))
-          (message (format "Для %d гр. нужно %.2f столовых ложек" grams res))
-          (save-excursion
-            (end-of-line)
-            (insert (format " (%.2f ложки)" res))))
+            (insert (format " (%.2f %s)" res measure-thing))))
       (concat "Не получилось найти продукт по имени: " product))))
 #+end_src
 
@@ -150,15 +133,15 @@ _Что делать?_
 Опару настаивать 1 час при комнатной температуре или 24 часа в холодильнике.
 
 _Рецепт опары:_
-- 300 мл Вода (1.2 стакана)
-- 300 гр. Мука (1.9 стакана)
-- 5 гр Сухие дрожжи (пол столовой ложки)
-- 5 гр Мед (меньше половину столовой ложки)
+- 300 мл Вода (1.20 стакана)
+- 300 гр. Мука (1.88 стакана)
+- 5 гр Сухие дрожжи (0.50 ложек)
+- 5 гр Мед (0.14 ложек)
 
 _Тесто:_
- - Опара (вся)
+ - Опара
  - 700 мл Воды (2.80 стакана)
- - 40 гр. Морская соль (1.33 ложки)
+ - 40 гр. Морская соль (1.33 ложек)
  - 1250 гр. Мука (7.81 стакана)
 
 После замешивания тесто станет липким, его нужно просто оставить на 15 минут.
