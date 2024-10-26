@@ -45,17 +45,18 @@
                            (selection (completing-read "Выберете продукт: " choices)))
                       selection)))
   (setq grams (or grams
-                  (ignore-errors (string-to-number (current-word)))
+                  (when (not (string-empty-p (current-word))) (ignore-errors (string-to-number (current-word))))
                   (read-number "Сколько грамм? ")))
   (let ((product-proportion (-find (lambda (coll) (string= product (car coll))) p2p)))
     (if product-proportion
-        (let* ((cups? (> grams 100))
+        (let* ((cups? (>= grams 100))
                (res (/ (* grams 1.0) (nth (if cups? 1 2) product-proportion)))
                (measure-thing (if cups? "стакана" "ложек")))
           (message (format "Для %d гр. нужно %.2f %s" grams res measure-thing ))
-          (save-excursion
+          (when insert-instantly
+            (save-excursion
             (end-of-line)
-            (insert (format " (%.2f %s)" res measure-thing))))
+            (insert (format " (%.2f %s)" res measure-thing)))))
       (concat "Не получилось найти продукт по имени: " product))))
 #+end_src
 
